@@ -28,6 +28,8 @@ courses_table = Table(
 class GroupModel(object):
     def __init__(self, name):
         self.name = name
+    def __repr__(self):
+        return self.name
 
 
 class StudentModel(object):
@@ -35,9 +37,13 @@ class StudentModel(object):
         self.group_id = group_id
         self.first_name = first_name
         self.last_name = last_name
+    def __repr__(self):
+        return f'\n{self.first_name} {self.last_name}: {self.group_id}'
 
 
-class CourseMode(object):
+class CourseModel(object):
     def __init__(self, name, description):
         self.name = name
         self.description = description
+    def __repr__(self):
+        return name
