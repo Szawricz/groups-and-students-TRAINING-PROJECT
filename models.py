@@ -1,6 +1,6 @@
 """The models module."""
 
-from sqlalchemy import Column, ForeignKey, Integer, MetaData, String, Table
+from sqlalchemy import Column, Integer, MetaData, String, Table
 from sqlalchemy.orm import mapper
 
 metadata = MetaData()
@@ -24,10 +24,10 @@ courses_table = Table(
 )
 
 
-
 class GroupModel(object):
     def __init__(self, name):
         self.name = name
+
     def __repr__(self):
         return self.name
 
@@ -37,6 +37,7 @@ class StudentModel(object):
         self.group_id = group_id
         self.first_name = first_name
         self.last_name = last_name
+
     def __repr__(self):
         return f'\n{self.first_name} {self.last_name}: {self.group_id}'
 
@@ -45,5 +46,11 @@ class CourseModel(object):
     def __init__(self, name, description):
         self.name = name
         self.description = description
+
     def __repr__(self):
-        return name
+        return self.name
+
+
+group_mapper = mapper(GroupModel, groups_table)
+course_mapper = mapper(CourseModel, courses_table)
+student_mapper = mapper(StudentModel, students_table)
