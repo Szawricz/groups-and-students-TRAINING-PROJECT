@@ -1,9 +1,22 @@
 """The data generating and database filling module."""
 
+from random import choice, choices, randint
 from string import ascii_uppercase, digits
-from random import choices, choice, randint
-from models import StudentModel, CourseModel, GroupModel
 
+from sqlalchemy import create_engine
+from sqlalchemy.engine.url import URL
+from sqlalchemy.orm import sessionmaker
+
+from models import CourseModel, GroupModel, StudentModel, metadata
+
+DATABASE = {
+        'drivername': 'postgres',
+        'host': 'localhost',
+        'port': '5432',
+        'username': 'Shavrin_Maksim',
+        'password': '123456789',
+        'database': 'students',
+    }
 
 
 def generate_courses() -> list:
@@ -20,6 +33,7 @@ def generate_courses() -> list:
         'english language': 'a West Germanic language first spoken in early medieval England which eventually became the leading language of international discourse in today´s world',
     }
     return [CourseModel(name, descr) for name, descr in courses.items()]
+
 
 def generate_students_names(students_number: int) -> set:
     students_names = set()
@@ -38,6 +52,7 @@ def generate_students_names(students_number: int) -> set:
         students_names.add(full_name)
     return students_names
 
+
 def generate_groups(groups_number: int) -> list:
     groups_names = set()
     while len(groups_names) < groups_number:
@@ -46,6 +61,7 @@ def generate_groups(groups_number: int) -> list:
         name = f'{two_characters}-{two_digits}'
         groups_names.add(name)
     return [GroupModel(name) for name in groups_names]
+
 
 def generate_groups_volumes(groups_number: int, students_number: int,
                             min_in_group: int, max_in_group: int) -> dict:
@@ -61,6 +77,7 @@ def generate_groups_volumes(groups_number: int, students_number: int,
         students_number -= volume
         groups_volumes[group.name] = volume
     return (groups_volumes, groups)
+
 
 def generate_students_and_groups(
         groups_number: int, students_number: int,
@@ -81,3 +98,19 @@ def generate_students_and_groups(
         students.append(StudentModel(None, full_name[0], full_name[1]))
     return (students, groups)
 
+
+if __name__ == "__main__":
+    engine = create_engine(URL(**DATABASE), echo=True)
+    metadata.create_all(engine)
+
+    students_groups = generate_students_and_groups(20,200, 10, 30)
+    students = students_groups[0]
+    groups = students_groups[1]
+    courses = generate_courses()
+
+    Session = sessionmaker()
+    session = Session(bind=engine)
+    session.add_all(students)
+    session.add_all(groups)
+    session.add_all(courses)
+    session.commit()
