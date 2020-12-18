@@ -2,6 +2,7 @@
 
 from random import choice, choices, randint
 from string import ascii_uppercase, digits
+from random import choices, randint
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
@@ -17,6 +18,10 @@ DATABASE = {
         'password': '123456789',
         'database': 'students',
     }
+GROUPS_NUMBER = 20
+STUDENTS_NUMBER = 200
+MIN_STUDENTS_IN_GROUP = 10
+MAX_STUDENTS_IN_GROUP = 30
 
 
 def generate_courses() -> list:
@@ -103,13 +108,23 @@ if __name__ == "__main__":
     engine = create_engine(URL(**DATABASE), echo=True)
     Base.metadata.create_all(engine)
 
-    students_groups = generate_students_and_groups(20, 200, 10, 30)
+    students_groups = generate_students_and_groups(
+        GROUPS_NUMBER,
+        STUDENTS_NUMBER,
+        MIN_STUDENTS_IN_GROUP,
+        MAX_STUDENTS_IN_GROUP,
+        )
     students = students_groups[0]
     groups = students_groups[1]
     courses = generate_courses()
 
     Session = sessionmaker()
     session = Session(bind=engine)
+    
+    for student in students:
+        choiced_courses = set(choices(courses, k=randint(1, 3)))
+        student.courses.extend(choiced_courses)
+    
     session.add_all(students)
     session.add_all(groups)
     session.add_all(courses)
