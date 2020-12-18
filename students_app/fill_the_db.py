@@ -2,13 +2,12 @@
 
 from random import choice, choices, randint
 from string import ascii_uppercase, digits
-from random import choices, randint
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker
 
-from models import CourseModel, GroupModel, StudentModel, Base
+from models import Base, CourseModel, GroupModel, StudentModel
 
 DATABASE = {
         'drivername': 'postgres',
