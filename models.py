@@ -1,30 +1,16 @@
 """The models module."""
 
-from sqlalchemy import Column, Integer, MetaData, String, Table
-from sqlalchemy.orm import mapper
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
-metadata = MetaData()
-groups_table = Table(
-    'group', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String),
-)
-students_table = Table(
-    'student', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('group_id', String),
-    Column('first_name', String),
-    Column('last_name', String),
-)
-courses_table = Table(
-    'course', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String),
-    Column('description', String),
-)
+Base = declarative_base()
 
 
-class GroupModel(object):
+class GroupModel(Base):
+    __tablename__ = 'group'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+
     def __init__(self, name):
         self.name = name
 
@@ -32,7 +18,13 @@ class GroupModel(object):
         return self.name
 
 
-class StudentModel(object):
+class StudentModel(Base):
+    __tablename__ = 'student'
+    id = Column(Integer, primary_key=True)
+    group_id = Column(String)
+    first_name = Column(String)
+    last_name = Column(String)
+
     def __init__(self, group_id, first_name, last_name):
         self.group_id = group_id
         self.first_name = first_name
@@ -42,7 +34,12 @@ class StudentModel(object):
         return f'\n{self.first_name} {self.last_name}: {self.group_id}'
 
 
-class CourseModel(object):
+class CourseModel(Base):
+    __tablename__ = 'course'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    description = Column(String)
+
     def __init__(self, name, description):
         self.name = name
         self.description = description
@@ -50,7 +47,3 @@ class CourseModel(object):
     def __repr__(self):
         return self.name
 
-
-group_mapper = mapper(GroupModel, groups_table)
-course_mapper = mapper(CourseModel, courses_table)
-student_mapper = mapper(StudentModel, students_table)

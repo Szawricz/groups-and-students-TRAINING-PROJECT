@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker
 
-from models import CourseModel, GroupModel, StudentModel, metadata
+from models import CourseModel, GroupModel, StudentModel, Base
 
 DATABASE = {
         'drivername': 'postgres',
@@ -101,9 +101,9 @@ def generate_students_and_groups(
 
 if __name__ == "__main__":
     engine = create_engine(URL(**DATABASE), echo=True)
-    metadata.create_all(engine)
+    Base.metadata.create_all(engine)
 
-    students_groups = generate_students_and_groups(20,200, 10, 30)
+    students_groups = generate_students_and_groups(20, 200, 10, 30)
     students = students_groups[0]
     groups = students_groups[1]
     courses = generate_courses()
