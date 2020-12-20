@@ -1,22 +1,36 @@
 <!DOCTYPE HTML>
 <html>
- <head>
+
+<head>
   <meta charset="utf-8">
   <title>COURSES</title>
- </head>
- <body>
-    <a href="/students/">STUDENTS</a>
-    <a href="/groups/">GROUPS</a>
+</head>
+
+<body>
+  <h1>COURSES</h1>
+  <a href="/students/">STUDENTS</a>
+  <a href="/groups/">GROUPS</a>
   <table border="1">
-   <tr>
-    <th>ID</th>
-    <th>Course</th>
-    <th>Volume</th>
-    <th>Students</th>
-   </tr>
-   <tr><td>34,5</td><td>3,5</td><td>36</td><td>23</td></tr>
-   <tr><td>35,5</td><td>4</td><td>36⅔</td><td>23–23,5</td></tr>
-   <tr><td>36</td><td>4,5</td><td>37⅓</td><td>23,5</td></tr>
+    <tr>
+      <th>ID</th>
+      <th>Course</th>
+      <th>Volume</th>
+      <th>Students</th>
+    <tr>{% for string in data %}
+      <td>{{ string[0] }}</td>
+      <td>
+        <p>{{ string[1] }}</p>
+        <p>{{ string[2] }}</p>
+      </td>
+      <td>{{ string[3] }}</td>
+      <td>{% for id, name in string[4] %}
+        <p>{{id}} {{ name }}<button>DELETE</button><button>LEAVE COUURSE</button></p>
+        {% endfor %}<select>
+          <option disabled>ADD</option>
+        </select></td>
+    </tr>
+    {% endfor %}
   </table>
- </body>
+</body>
+
 </html>

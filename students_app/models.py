@@ -116,8 +116,17 @@ def get_courses():
         for student in course.students:
             students_list.append(
                 [student.id, f'{student.first_name} {student.last_name}'],
-                ) 
-        courses.append([id, name, description, students_list])
+                )
+        courses.append(
+            [id, name, description, len(students_list), students_list],
+            )
     return courses
 
-print(*get_courses(), sep='\n')
+def add_student(first_name: str, last_name: str):
+    session.add(StudentModel(None, first_name, last_name))
+    session.commit()
+
+def delete_student(student_id: int):
+    row = session.query(StudentModel).filter(StudentModel.id == student_id).one()
+    session.delete(row)
+    session.commit()
