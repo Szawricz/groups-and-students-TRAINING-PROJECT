@@ -1,3 +1,27 @@
+from flask import Flask, render_template, request
+from models import Session, engine, StudentModel, CourseModel, get_students
+
+app = Flask(__name__)  # Init the flask application
+
+
+
+@app.route('/', methods=['GET'])
+@app.route('/students/', methods=['GET'])
+def show_students():
+    return render_template('students.html', students=get_students())
+
+
+@app.route('/courses/', methods=['GET'])
+def show_courses():
+    return render_template('groups.html')
+
+
+@app.route('/groups/', methods=['GET'])
+def show_groups():
+    return render_template('courses.html')
+
+
+
 # Find all groups with less or equals student count.
 def find_groups_with_le_wolume(volume: int):
     pass
