@@ -3,20 +3,9 @@
 from random import choice, choices, randint
 from string import ascii_uppercase, digits
 
-from sqlalchemy import create_engine
-from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import sessionmaker
+from models import (Base, CourseModel, GroupModel, Session, StudentModel,
+                    engine, session)
 
-from models import Base, CourseModel, GroupModel, StudentModel
-
-DATABASE = {
-        'drivername': 'postgres',
-        'host': 'localhost',
-        'port': '5432',
-        'username': 'Shavrin_Maksim',
-        'password': '123456789',
-        'database': 'students',
-    }
 GROUPS_NUMBER = 20
 STUDENTS_NUMBER = 200
 MIN_STUDENTS_IN_GROUP = 10
@@ -104,7 +93,6 @@ def generate_students_and_groups(
 
 
 if __name__ == "__main__":
-    engine = create_engine(URL(**DATABASE), echo=True)
     Base.metadata.create_all(engine)
 
     students_groups = generate_students_and_groups(
@@ -116,9 +104,6 @@ if __name__ == "__main__":
     students = students_groups[0]
     groups = students_groups[1]
     courses = generate_courses()
-
-    Session = sessionmaker()
-    session = Session(bind=engine)
     
     for student in students:
         choiced_courses = set(choices(courses, k=randint(1, 3)))
