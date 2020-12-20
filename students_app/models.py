@@ -1,10 +1,27 @@
 """The models module."""
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Table
+from sqlalchemy import (Column, ForeignKey, Integer, String, Table,
+                        create_engine)
+from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker
+
+DATABASE = {
+        'drivername': 'postgres',
+        'host': 'localhost',
+        'port': '5432',
+        'username': 'Shavrin_Maksim',
+        'password': '123456789',
+        'database': 'students',
+    }
 
 Base = declarative_base()
+
+engine = create_engine(URL(**DATABASE), echo=False)
+
+Session = sessionmaker()
+
+session = Session(bind=engine)
 
 association_table = Table(
     'association',
@@ -59,3 +76,48 @@ class CourseModel(Base):
 
     def __repr__(self):
         return self.name
+
+
+def get_students():
+    students = []
+    for id, first_name, last_name, group_id, student in session.query(
+            StudentModel.id,
+            StudentModel.first_name,
+            StudentModel.last_name,
+            StudentModel.group_id,
+            StudentModel):
+        courses_list = [course.name for course in student.courses]
+        students.append(
+            [id, f'{first_name} {last_name}', group_id, courses_list],
+            )
+    return students
+
+def get_groups():
+    groups = []
+    for id, name in session.query(GroupModel.id, GroupModel.name):
+        students = []
+        for student_id, first_name, last_name in session.query(
+                StudentModel.id,
+                StudentModel.first_name,
+                StudentModel.last_name,
+                ).filter(StudentModel.group_id == name):
+            students.append([student_id, f'{first_name} {last_name}'])
+        groups.append([id, name, len(students), students])
+    return groups
+
+def get_courses():
+    courses = []
+    for id, name, description, course in session.query(
+            CourseModel.id,
+            CourseModel.name,
+            CourseModel.description,
+            CourseModel):
+        students_list = []
+        for student in course.students:
+            students_list.append(
+                [student.id, f'{student.first_name} {student.last_name}'],
+                ) 
+        courses.append([id, name, description, students_list])
+    return courses
+
+print(*get_courses(), sep='\n')
