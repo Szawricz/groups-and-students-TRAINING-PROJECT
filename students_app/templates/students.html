@@ -26,12 +26,16 @@
     </tr>
     <tr>{% for string in data %}
       <td>{{ string[0] }}</td>
-      <td>{{ string[1] }}<form><button type="submit" formaction="/students/delete/"
-            name="id" value={{ string[0] }}>DELETE</button></form>
+      <td>{{ string[1] }}<form><button type="submit" formaction="/students/delete/" name="id"
+            value={{ string[0] }}>DELETE</button></form>
       </td>
       <td>{{ string[2] }}</td>
       <td>{% for name in string[3] %}
-        <p>{{ name }}<button>DELETE</button></p>
+        <form>
+          {{ name }}<button type="submit" formaction="/students/remove_from_course/" name="course_name"
+            value="{{ name }}">LEAVE</button>
+          <input type="hidden" name="student_id" value={{ string[0] }}></input>
+        </form>
         {% endfor %}<select>
           <option disabled>Select a course</option>
         </select></td>

@@ -127,6 +127,15 @@ def add_student(first_name: str, last_name: str):
     session.commit()
 
 def delete_student(student_id: int):
-    row = session.query(StudentModel).filter(StudentModel.id == student_id).one()
-    session.delete(row)
+    session.delete(
+        session.query(
+            StudentModel).filter(StudentModel.id == student_id).one())
+    session.commit()
+
+def leave_course(student_id: int, course_name: str):
+    course = session.query(
+        CourseModel).filter(CourseModel.name == course_name).one()
+    student = session.query(
+        StudentModel).filter(StudentModel.id == student_id).one()
+    student.courses.remove(course)
     session.commit()

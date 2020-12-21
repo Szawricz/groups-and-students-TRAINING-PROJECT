@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 
-from models import get_courses, get_groups, get_students, add_student, delete_student
+from models import (add_student, delete_student, get_courses, get_groups,
+                    get_students, leave_course)
 
 app = Flask(__name__)  # Init the flask application
 
@@ -41,8 +42,12 @@ def delete_student_by_id():
     return show_students()
 
 # Remove the student from one of his or her courses
-def delete_student_by_id(student_id: int, course_name: str):
-    pass
+@app.route('/students/remove_from_course/', methods=['GET'])
+def remove_student_from_course():
+    student_id = request.args.get('student_id')
+    course_name = request.args.get('course_name')
+    leave_course(student_id, course_name)
+    return show_students()
 
 
 
