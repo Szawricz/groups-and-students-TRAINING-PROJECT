@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 
 from models import (add_student, delete_student, get_courses, get_groups,
-                    get_students, leave_course)
+                    get_students, leave_course, student_to_course)
 
 app = Flask(__name__)  # Init the flask application
 
@@ -49,6 +49,13 @@ def remove_student_from_course():
     leave_course(student_id, course_name)
     return show_students()
 
+# Add a student to the course (from a list)
+@app.route('/students/add/to_course/', methods=['GET'])
+def add_student_to_course():
+    student_id = request.args.get('student_id')
+    course_name = request.args.get('course_name')
+    student_to_course(student_id, course_name)
+    return show_students()
 
 
 # Find all groups with less or equals student count.
@@ -59,9 +66,6 @@ def find_groups_with_le_wolume(volume: int):
 def finnd_group_students(group_name: str):
     pass
 
-# Add a student to the course (from a list)
-def add_student_to_course(student_id: int, course_name: str):
-    pass
 
 
 if __name__ == '__main__':

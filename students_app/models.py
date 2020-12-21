@@ -87,10 +87,16 @@ def get_students():
             StudentModel.group_id,
             StudentModel):
         courses_list = [course.name for course in student.courses]
+        all_courses = [
+            course.name for course in session.query(CourseModel.name)
+            ]
+        dif = list(set(all_courses) - set(courses_list))
         students.append(
-            [id, f'{first_name} {last_name}', group_id, courses_list],
+            [id, f'{first_name} {last_name}', group_id, courses_list, dif],
             )
     return students
+
+
 
 def get_groups():
     groups = []
@@ -139,3 +145,12 @@ def leave_course(student_id: int, course_name: str):
         StudentModel).filter(StudentModel.id == student_id).one()
     student.courses.remove(course)
     session.commit()
+
+def student_to_course(student_id: int, course_name: str):
+    course = session.query(
+        CourseModel).filter(CourseModel.name == course_name).one()
+    student = session.query(
+        StudentModel).filter(StudentModel.id == student_id).one()
+    student.courses.append(course)
+    session.commit()
+

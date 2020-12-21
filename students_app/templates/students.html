@@ -36,9 +36,16 @@
             value="{{ name }}">LEAVE</button>
           <input type="hidden" name="student_id" value={{ string[0] }}></input>
         </form>
-        {% endfor %}<select>
-          <option disabled>Select a course</option>
-        </select></td>
+        {% endfor %}<form action="/students/add/to_course/"><select name="course_name">
+            <option disabled>Select a course</option>
+            {% for course in string[4] %}
+            <option>{{ course }}</option>
+            {% endfor %}
+          </select>
+          <input type="hidden" name="student_id" value={{ string[0] }}></input>
+          <button type="submit">ADD</button>
+        </form>
+      </td>
     </tr>
     {% endfor %}
 
