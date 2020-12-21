@@ -10,8 +10,10 @@
    <h1>GROUPS</h1>
    <a href="/students/">STUDENTS</a>
    <p></p>
-   <form action="/groups/find_le/"><input name="volume" min="0" step="1" required placeholder="less or equal"></input>
-   <button type="submit">Find groups</button></form>
+   <form action="/groups/find_le/">
+      <input name="volume" min="0" step="1" required placeholder="less or equal"></input>
+      <button formmethod="GET" type="submit">Find groups</button>
+   </form>
    <p></p>
    <table border="1">
       <tr>
@@ -25,10 +27,10 @@
          <td>{{ string[1] }}</td>
          <td>{{ string[2] }}</td>
          <td>{% for id, name in string[3] %}
-           {{id}} {{ name }} 
-           {% endfor %}
-       </tr>
-       {% endfor %}
+            {{id}} {{ name }}
+            {% endfor %}
+      </tr>
+      {% endfor %}
    </table>
 </body>
 

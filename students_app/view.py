@@ -24,33 +24,33 @@ def show_groups():
 
 
 # Add new student
-@app.route('/students/add/', methods=['GET'])
+@app.route('/students/add/', methods=['POST'])
 def add_new_student():
-    first_name = request.args.get('first_name')
-    last_name = request.args.get('last_name')
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
     add_student(first_name, last_name)
     return show_students()
 
 # Delete student by STUDENT_ID
-@app.route('/students/delete/', methods=['GET'])
+@app.route('/students/delete/', methods=['POST'])
 def delete_student_by_id():
-    student_id = request.args.get('id')
+    student_id = request.form.get('id')
     delete_student(student_id)
     return show_students()
 
 # Remove the student from one of his or her courses
-@app.route('/students/remove_from_course/', methods=['GET'])
+@app.route('/students/remove_from_course/', methods=['POST'])
 def remove_student_from_course():
-    student_id = request.args.get('student_id')
-    course_name = request.args.get('course_name')
-    leave_course(student_id, course_name)
+    student_id = request.form.get('student_id')
+    course_name = request.form.get('course_name')
+    leave_course(int(student_id), course_name)
     return show_students()
 
 # Add a student to the course (from a list)
-@app.route('/students/add/to_course/', methods=['GET'])
+@app.route('/students/add/to_course/', methods=['POST'])
 def add_student_to_course():
-    student_id = request.args.get('student_id')
-    course_name = request.args.get('course_name')
+    student_id = request.form.get('student_id')
+    course_name = request.form.get('course_name')
     student_to_course(student_id, course_name)
     return show_students()
 
@@ -61,6 +61,7 @@ def show_groups_with_le_wolume():
     volume = request.args.get('volume')
     data = find_groups_le(int(volume))
     return render_template('groups.html', data=data)
+
 
 # Find all students related to the course with a given name.
 @app.route('/students/on_course/', methods=['GET'])
