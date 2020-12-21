@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request
 
-from models import (add_student, delete_student, find_groups_le, get_courses,
-                    get_groups, get_students, leave_course, student_to_course)
+from models import (add_student, delete_student, find_groups_le,
+                    get_course_students, get_courses, get_groups, get_students,
+                    leave_course, student_to_course)
 
 app = Flask(__name__)  # Init the flask application
 
@@ -10,13 +11,9 @@ app = Flask(__name__)  # Init the flask application
 @app.route('/students/', methods=['GET'])
 def show_students():
     data = get_students()
-    return render_template('students.html', data=data)
+    courses = get_courses()
+    return render_template('students.html', data=data, courses=courses)
 
-
-@app.route('/courses/', methods=['GET'])
-def show_courses():
-    data = get_courses()
-    return render_template('courses.html', data=data)
 
 
 @app.route('/groups/', methods=['GET'])
@@ -66,9 +63,12 @@ def show_groups_with_le_wolume():
     return render_template('groups.html', data=data)
 
 # Find all students related to the course with a given name.
-def finnd_group_students(group_name: str):
-    pass
-
+@app.route('/students/on_course/', methods=['GET'])
+def show_course_students():
+    courses = get_courses()
+    course_name = request.args.get('course_name')
+    data = get_course_students(course_name)
+    return render_template('students.html', data=data, courses=courses)
 
 
 if __name__ == '__main__':

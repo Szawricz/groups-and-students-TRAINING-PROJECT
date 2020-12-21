@@ -9,7 +9,6 @@
 <body>
    <h1>GROUPS</h1>
    <a href="/students/">STUDENTS</a>
-   <a href="/courses/">COURSES</a>
    <p></p>
    <form action="/groups/find_le/"><input name="volume" min="0" step="1" required placeholder="less or equal"></input>
    <button type="submit">Find groups</button></form>
@@ -26,7 +25,7 @@
          <td>{{ string[1] }}</td>
          <td>{{ string[2] }}</td>
          <td>{% for id, name in string[3] %}
-           <p>{{id}} {{ name }}<button>DELETE</button></p>
+           {{id}} {{ name }} 
            {% endfor %}
        </tr>
        {% endfor %}

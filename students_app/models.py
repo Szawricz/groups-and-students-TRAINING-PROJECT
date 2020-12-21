@@ -78,6 +78,10 @@ class CourseModel(Base):
         return self.name
 
 
+def get_courses():
+    return [course.name for course in session.query(CourseModel.name)]
+
+
 def get_students():
     students = []
     for id, first_name, last_name, group_id, student in session.query(
@@ -87,15 +91,12 @@ def get_students():
             StudentModel.group_id,
             StudentModel):
         courses_list = [course.name for course in student.courses]
-        all_courses = [
-            course.name for course in session.query(CourseModel.name)
-            ]
+        all_courses = get_courses()
         dif = list(set(all_courses) - set(courses_list))
         students.append(
             [id, f'{first_name} {last_name}', group_id, courses_list, dif],
             )
     return students
-
 
 
 def get_groups():
@@ -111,32 +112,18 @@ def get_groups():
         groups.append([id, name, len(students), students])
     return groups
 
-def get_courses():
-    courses = []
-    for id, name, description, course in session.query(
-            CourseModel.id,
-            CourseModel.name,
-            CourseModel.description,
-            CourseModel):
-        students_list = []
-        for student in course.students:
-            students_list.append(
-                [student.id, f'{student.first_name} {student.last_name}'],
-                )
-        courses.append(
-            [id, name, description, len(students_list), students_list],
-            )
-    return courses
 
 def add_student(first_name: str, last_name: str):
     session.add(StudentModel(None, first_name, last_name))
     session.commit()
+
 
 def delete_student(student_id: int):
     session.delete(
         session.query(
             StudentModel).filter(StudentModel.id == student_id).one())
     session.commit()
+
 
 def leave_course(student_id: int, course_name: str):
     course = session.query(
@@ -146,6 +133,7 @@ def leave_course(student_id: int, course_name: str):
     student.courses.remove(course)
     session.commit()
 
+
 def student_to_course(student_id: int, course_name: str):
     course = session.query(
         CourseModel).filter(CourseModel.name == course_name).one()
@@ -153,6 +141,7 @@ def student_to_course(student_id: int, course_name: str):
         StudentModel).filter(StudentModel.id == student_id).one()
     student.courses.append(course)
     session.commit()
+
 
 def find_groups_le(volume: int):
     groups = []
@@ -162,3 +151,9 @@ def find_groups_le(volume: int):
     return groups
 
 
+def get_course_students(course_name: str):
+    students = []
+    for student in get_students():
+        if course_name in student[3]:
+            students.append(student)
+    return students

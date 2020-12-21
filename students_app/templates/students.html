@@ -9,15 +9,24 @@
 <body>
   <h1>STUDENTS</h1>
   <a href="/groups/">GROUPS</a>
-  <a href="/courses/">COURSES</a>
   <p></p>
   <form method="GET" action="/students/add/">
     <input required name="first_name" placeholder="First Name"></input>
     <input required name="last_name" placeholder="Last Name"></input>
     <button type="submit">Add new student</button>
   </form>
+  <form action="/students/on_course/">
+    <select name="course_name">
+      Show selected course students:
+      <option disabled>Select a course</option>
+      {% for course in courses %}
+      <option>{{ course }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">SHOW</button>
+  </form>
   <p></p>
-  <table border="1">
+  <table border="3">
     <tr>
       <th>ID</th>
       <th>Student</th>
