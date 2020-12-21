@@ -154,3 +154,11 @@ def student_to_course(student_id: int, course_name: str):
     student.courses.append(course)
     session.commit()
 
+def find_groups_le(volume: int):
+    groups = []
+    for group in get_groups():
+        if group[2] <= volume:
+            groups.append(group)
+    return groups
+
+
