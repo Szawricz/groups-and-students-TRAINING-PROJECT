@@ -15,12 +15,10 @@ def show_students():
     return render_template('students.html', data=data, courses=courses)
 
 
-
 @app.route('/groups/', methods=['GET'])
 def show_groups():
     data = get_groups()
     return render_template('groups.html', data=data)
-
 
 
 # Add new student
@@ -31,12 +29,14 @@ def add_new_student():
     add_student(first_name, last_name)
     return show_students()
 
+
 # Delete student by STUDENT_ID
 @app.route('/students/delete/', methods=['POST'])
 def delete_student_by_id():
     student_id = request.form.get('id')
     delete_student(student_id)
     return show_students()
+
 
 # Remove the student from one of his or her courses
 @app.route('/students/remove_from_course/', methods=['POST'])
@@ -45,6 +45,7 @@ def remove_student_from_course():
     course_name = request.form.get('course_name')
     leave_course(int(student_id), course_name)
     return show_students()
+
 
 # Add a student to the course (from a list)
 @app.route('/students/add/to_course/', methods=['POST'])

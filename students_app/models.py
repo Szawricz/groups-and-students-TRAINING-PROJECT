@@ -39,7 +39,7 @@ class GroupModel(Base):
     def __init__(self, name):
         self.name = name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.name
 
 
@@ -60,7 +60,7 @@ class StudentModel(Base):
         self.first_name = first_name
         self.last_name = last_name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'\n{self.first_name} {self.last_name}: {self.group_id}'
 
 
@@ -74,15 +74,15 @@ class CourseModel(Base):
         self.name = name
         self.description = description
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.name
 
 
-def get_courses():
+def get_courses() -> list:
     return [course.name for course in session.query(CourseModel.name)]
 
 
-def get_students():
+def get_students() -> list:
     students = []
     for id, first_name, last_name, group_id, student in session.query(
             StudentModel.id,
@@ -99,7 +99,7 @@ def get_students():
     return students
 
 
-def get_groups():
+def get_groups() -> list:
     groups = []
     for id, name in session.query(GroupModel.id, GroupModel.name):
         students = []
@@ -143,7 +143,7 @@ def student_to_course(student_id: int, course_name: str):
     session.commit()
 
 
-def find_groups_le(volume: int):
+def find_groups_le(volume: int) -> list:
     groups = []
     for group in get_groups():
         if group[2] <= volume:
@@ -151,7 +151,7 @@ def find_groups_le(volume: int):
     return groups
 
 
-def get_course_students(course_name: str):
+def get_course_students(course_name: str) -> list:
     students = []
     for student in get_students():
         if course_name in student[3]:
