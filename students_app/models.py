@@ -17,7 +17,7 @@ DATABASE = {
 
 Base = declarative_base()
 
-engine = create_engine(URL(**DATABASE), echo=False)
+engine = create_engine(URL(**DATABASE), echo=True)
 
 Session = sessionmaker()
 

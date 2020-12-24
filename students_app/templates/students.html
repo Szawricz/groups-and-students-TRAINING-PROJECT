@@ -33,7 +33,8 @@
       <th>Group</th>
       <th>Courses</th>
     </tr>
-    <tr>{% for string in data %}
+    {% for string in data %}
+    <tr>
       <td>{{ string[0] }}</td>
       <td>
         {{ string[1] }}

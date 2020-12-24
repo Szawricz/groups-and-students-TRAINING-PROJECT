@@ -26,6 +26,8 @@ def show_groups():
 def add_new_student():
     first_name = request.form.get('first_name')
     last_name = request.form.get('last_name')
+    if first_name is None or last_name is None:
+        return show_students()
     add_student(first_name, last_name)
     return show_students()
 
@@ -34,6 +36,8 @@ def add_new_student():
 @app.route('/students/delete/', methods=['POST'])
 def delete_student_by_id():
     student_id = request.form.get('id')
+    if student_id is None:
+        return show_students()
     delete_student(student_id)
     return show_students()
 
@@ -43,7 +47,9 @@ def delete_student_by_id():
 def remove_student_from_course():
     student_id = request.form.get('student_id')
     course_name = request.form.get('course_name')
-    leave_course(int(student_id), course_name)
+    if student_id is None or course_name is None:
+        return show_students()
+    leave_course(student_id, course_name)
     return show_students()
 
 
@@ -52,6 +58,8 @@ def remove_student_from_course():
 def add_student_to_course():
     student_id = request.form.get('student_id')
     course_name = request.form.get('course_name')
+    if student_id is None or course_name is None:
+        return show_students()
     student_to_course(student_id, course_name)
     return show_students()
 
