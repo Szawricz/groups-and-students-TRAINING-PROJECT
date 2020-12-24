@@ -38,9 +38,20 @@ class TestReporterMethods(TestCase):
         self.assertIn(sample_before, response_before)
         self.assertIn(sample_after, response_after)
 
+    def test_remove_student_from_course(self):
+        response_after = self.client.post(
+            '/students/remove_from_course/', data=dict(student_id='201', course_name='biology')).get_data(as_text=True)
+        sample_after = '      <td>203</td>\n      <td>\n        Milo Martic\n        <form>\n          <button formmethod="POST" type="submit" formaction="/students/delete/" name="id" value="203">\n            DELETE\n          </button>\n        </form>\n      </td>\n      <td>None</td>\n      <td>\n        <form method="POST">\n          russian language\n          <button type="submit" formaction="/students/remove_from_course/" name="course_name" value="russian language">\n            LEAVE\n          </button>'
+        response_before = self.client.get('/students/').get_data(as_text=True)
+        sample_before = ' <tr>\n      <td>201</td>\n      <td>\n        Milo Martic\n        <form>\n          <button formmethod="POST" type="submit" formaction="/students/delete/" name="id" value="203">\n            DELETE\n          </button>\n        </form>\n      </td>\n      <td>None</td>\n      <td>\n        <form action="/students/add/to_course/">\n          <select name="course_name">\n            <option disabled>Select a course</option>'
+        self.assertIn(sample_before, response_before)
+        self.assertIn(sample_after, response_after)
+
     def test_delete_student_by_id(self):
         response_before = self.client.get('/students/').get_data(as_text=True)
         self.assertIn('Martic', response_before)
         response_after = self.client.post('/students/delete/', data=dict(id='201')).get_data(as_text=True)
         self.assertNotIn('Martic', response_after)
         self.assertEqual(response_before.count('<tr>') - response_after.count('<tr>'), 1)
+
+    
