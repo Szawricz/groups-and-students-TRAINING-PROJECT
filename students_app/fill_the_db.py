@@ -87,14 +87,12 @@ def add_students_to_groups(
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
 
-    students_groups = add_students_to_groups(
+    students, groups = add_students_to_groups(
         generate_groups(GROUPS_NUMBER),
         generate_students(STUDENTS_NUMBER),
         MIN_STUDENTS_IN_GROUP,
         MAX_STUDENTS_IN_GROUP,
         )
-    students = students_groups[0]
-    groups = students_groups[1]
     courses = generate_courses()
     
     for student in students:
