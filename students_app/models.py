@@ -79,24 +79,11 @@ class CourseModel(Base):
 
 
 def get_courses() -> list:
-    return [course.name for course in session.query(CourseModel.name)]
+    return session.query(CourseModel).all()
 
 
 def get_students() -> list:
-    students = []
-    for id, first_name, last_name, group_id, student in session.query(
-            StudentModel.id,
-            StudentModel.first_name,
-            StudentModel.last_name,
-            StudentModel.group_id,
-            StudentModel):
-        courses_list = [course.name for course in student.courses]
-        all_courses = get_courses()
-        dif = list(set(all_courses) - set(courses_list))
-        students.append(
-            [id, f'{first_name} {last_name}', group_id, courses_list, dif],
-            )
-    return students
+    return session.query(StudentModel).all()
 
 
 def get_groups() -> list:
