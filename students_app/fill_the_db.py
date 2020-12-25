@@ -27,7 +27,7 @@ def generate_courses() -> list:
     return [CourseModel(name, descr) for name, descr in courses.items()]
 
 
-def generate_students_names(students_number: int) -> set:
+def generate_students(students_number: int) -> list:
     students_names = set()
     first_names = [
         'Liam', 'Olivia', 'Noah', 'Emma', 'Oliver', 'Ava', 'William', 'Sophia',
@@ -42,7 +42,7 @@ def generate_students_names(students_number: int) -> set:
     while len(students_names) < students_number:
         full_name = (choice(first_names), choice(second_names))
         students_names.add(full_name)
-    return students_names
+    return [StudentModel(None, *name) for name in students_names]
 
 
 def generate_groups(groups_number: int) -> list:
@@ -56,10 +56,9 @@ def generate_groups(groups_number: int) -> list:
 
 
 def generate_groups_volumes(groups_number: int, students_number: int,
-                            min_in_group: int, max_in_group: int) -> dict:
-    groups = generate_groups(groups_number)
-    groups_volumes = {}
-    for group in groups:
+                            min_in_group: int, max_in_group: int) -> list:
+    groups_volumes = []
+    for group in range(groups_number):
         if students_number > max_in_group:
             volume = randint(min_in_group, max_in_group)
         elif students_number in range(min_in_group, max_in_group + 1):
@@ -67,36 +66,33 @@ def generate_groups_volumes(groups_number: int, students_number: int,
         else:
             volume = 0
         students_number -= volume
-        groups_volumes[group.name] = volume
-    return (groups_volumes, groups)
+        groups_volumes.append(volume)
+    return groups_volumes
 
 
-def generate_students_and_groups(
-        groups_number: int, students_number: int,
+def add_students_to_groups(
+        groups: list, students: list,
         min_in_group: int, max_in_group: int) -> tuple:
-    groups_volumes_groups = generate_groups_volumes(
-        groups_number, students_number, min_in_group, max_in_group)
-    groups_volumes = groups_volumes_groups[0]
-    groups = groups_volumes_groups[1]
-    students_names = generate_students_names(students_number)
-    students = []
-    for group_name, volume in groups_volumes.items():
+    groups_volumes = generate_groups_volumes(
+        len(groups),
+        len(students),
+        min_in_group,
+        max_in_group,
+        )
+    students_counter = 0
+    for group_number, volume in enumerate(groups_volumes):
         for n in range(volume):
-            full_name = students_names.pop()
-            first_name = full_name[0]
-            last_name = full_name[1]
-            students.append(StudentModel(group_name, first_name, last_name))
-    for full_name in students_names:
-        students.append(StudentModel(None, full_name[0], full_name[1]))
+            students[students_counter + n].group_id = groups[group_number].name
+        students_counter += volume
     return (students, groups)
 
 
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
 
-    students_groups = generate_students_and_groups(
-        GROUPS_NUMBER,
-        STUDENTS_NUMBER,
+    students_groups = add_students_to_groups(
+        generate_groups(GROUPS_NUMBER),
+        generate_students(STUDENTS_NUMBER),
         MIN_STUDENTS_IN_GROUP,
         MAX_STUDENTS_IN_GROUP,
         )
