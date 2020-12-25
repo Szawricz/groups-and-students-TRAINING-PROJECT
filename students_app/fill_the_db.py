@@ -59,12 +59,9 @@ def generate_groups_volumes(groups_number: int, students_number: int,
                             min_in_group: int, max_in_group: int) -> list:
     groups_volumes = []
     for group in range(groups_number):
-        if students_number > max_in_group:
-            volume = randint(min_in_group, max_in_group)
-        elif students_number in range(min_in_group, max_in_group + 1):
-            volume = randint(min_in_group, students_number)
-        else:
-            volume = 0
+        volume = 0
+        if students_number > min_in_group:
+            volume = randint(min_in_group, min(max_in_group, students_number))
         students_number -= volume
         groups_volumes.append(volume)
     return groups_volumes
