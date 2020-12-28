@@ -4,6 +4,12 @@ from json import dumps
 
 from models import CourseModel, GroupModel, StudentModel, session
 
+JSON_DUMPS_PARAMS = dict(
+            indent=4,
+            separators=[', ', ' = '],
+            ensure_ascii=False,
+)
+
 app = Flask(__name__)  # Init the flask application
 api = Api(app, prefix='/api/v1.0')
 
@@ -26,7 +32,7 @@ class Students(Resource):
                 group_id=student.group_id,
                 courses=[course.name for course in student.courses],
             )
-        return students
+        return dumps(students, **JSON_DUMPS_PARAMS)
 
     def post(self):
         args = parser.parse_args()
@@ -61,7 +67,7 @@ class Groups(Resource):
                 volume=len(students),
                 students=students,
             )
-        return groups
+        return dumps(groups, **JSON_DUMPS_PARAMS)
 
     def post(self):
         args = parser.parse_args()
@@ -70,7 +76,7 @@ class Groups(Resource):
         for key, value in self.get().items():
             if value['volume'] <= volume:
                 groups[key] = value
-        return groups
+        return dumps(groups, **JSON_DUMPS_PARAMS)
 
 
 class StudentsOnCourse(Resource):
@@ -81,7 +87,7 @@ class StudentsOnCourse(Resource):
         for key, value in Students.get().items():
             if course_name in value['courses']:
                 students[key] = value
-        return students
+        return dumps(students, **JSON_DUMPS_PARAMS)
 
     def put(self, student_id: int):
         args = parser.parse_args()
@@ -106,8 +112,18 @@ class StudentsOnCourse(Resource):
         return {'mesage': f'Student with the ID = {student_id} removed from the {course_name} course.'}
 
 
-api.add_resource(Students, '/students/', methods=['GET', 'POST'], endpoint='students')
-api.add_resource(Students, '/students/<student_id>', methods=['DELETE'], endpoint='student')
+api.add_resource(
+    Students,
+    '/students/',
+    methods=['GET', 'POST'],
+    endpoint='students',
+    )
+api.add_resource(
+    Students,
+    '/students/<student_id>',
+    methods=['DELETE'],
+    endpoint='student',
+    )
 api.add_resource(Groups, '/groups/', methods=['GET', 'POST'])
 api.add_resource(StudentsOnCourse, '/course/', methods=['GET'])
 api.add_resource(
