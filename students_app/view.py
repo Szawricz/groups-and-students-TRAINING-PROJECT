@@ -1,84 +1,121 @@
-from flask import Flask, render_template, request
+from flask import Flask
+from flask_restful import Api, Resource, reqparse
+from json import dumps
 
-from models import (add_student, delete_student, find_groups_le,
-                    get_course_students, get_courses, get_groups, get_students,
-                    leave_course, student_to_course)
+from models import CourseModel, GroupModel, StudentModel, session
 
 app = Flask(__name__)  # Init the flask application
+api = Api(app, prefix='/api/v1.0')
 
 
-@app.route('/', methods=['GET'])
-@app.route('/students/', methods=['GET'])
-def show_students():
-    data = get_students()
-    courses = get_courses()
-    return render_template('students.html', data=data, courses=courses)
+parser = reqparse.RequestParser()
+parser.add_argument('first_name', type=str)
+parser.add_argument('last_name', type=str)
+parser.add_argument('volume', type=int)
+parser.add_argument('course_name', type=str)
 
 
-@app.route('/groups/', methods=['GET'])
-def show_groups():
-    data = get_groups()
-    return render_template('groups.html', data=data)
+class Students(Resource):
+    def get(self):
+        students = {}
+        for student in session.query(StudentModel).all():
+            students[student.id] = dict(
+                id=student.id,
+                first_name=student.first_name,
+                last_name=student.last_name,
+                group_id=student.group_id,
+                courses=[course.name for course in student.courses],
+            )
+        return students
+
+    def post(self):
+        args = parser.parse_args()
+        first_name = args['first_name']
+        last_name = args['last_name']
+        session.add(StudentModel(None, first_name, last_name))
+        session.commit()
+        return {'mesage': f'{first_name} {last_name} added.'}
+
+    def delete(self, student_id: int):
+        session.delete(
+            session.query(
+                StudentModel).filter(StudentModel.id == student_id).one())
+        session.commit()
+        return {'mesage': f'Student with the ID = {student_id} deleted.'}
 
 
-# Add new student
-@app.route('/students/add/', methods=['POST'])
-def add_new_student():
-    first_name = request.form.get('first_name')
-    last_name = request.form.get('last_name')
-    if first_name is None or last_name is None:
-        return show_students()
-    add_student(first_name, last_name)
-    return show_students()
+class Groups(Resource):
+    def get(self):
+        groups = {}
+        for group in session.query(GroupModel).all():
+            students = {}
+            for student in session.query(
+                    StudentModel).filter(StudentModel.group_id == group.name):
+                students[student.id] = dict(
+                    id=student.id,
+                    name=f'{student.first_name} {student.last_name}',
+                )
+            groups[group.name] = dict(
+                id=group.id,
+                name=group.name,
+                volume=len(students),
+                students=students,
+            )
+        return groups
+
+    def post(self):
+        args = parser.parse_args()
+        volume = args['volume']
+        groups = {}
+        for key, value in self.get().items():
+            if value['volume'] <= volume:
+                groups[key] = value
+        return groups
 
 
-# Delete student by STUDENT_ID
-@app.route('/students/delete/', methods=['POST'])
-def delete_student_by_id():
-    student_id = request.form.get('id')
-    if student_id is None:
-        return show_students()
-    delete_student(student_id)
-    return show_students()
+class StudentsOnCourse(Resource):
+    def get(self):
+        args = parser.parse_args()
+        course_name = args['course_name']
+        students = {}
+        for key, value in Students.get().items():
+            if course_name in value['courses']:
+                students[key] = value
+        return students
+
+    def put(self, student_id: int):
+        args = parser.parse_args()
+        course_name = args['course_name']
+        course = session.query(
+            CourseModel).filter(CourseModel.name == course_name).one()
+        student = session.query(
+            StudentModel).filter(StudentModel.id == student_id).one()
+        student.courses.append(course)
+        session.commit()
+        return {'mesage': f'Student with the ID = {student_id} added to the {course_name} course.'}
+
+    def delete(self, student_id: int):
+        args = parser.parse_args()
+        course_name = args['course_name']
+        course = session.query(
+            CourseModel).filter(CourseModel.name == course_name).one()
+        student = session.query(
+            StudentModel).filter(StudentModel.id == student_id).one()
+        student.courses.remove(course)
+        session.commit()
+        return {'mesage': f'Student with the ID = {student_id} removed from the {course_name} course.'}
 
 
-# Remove the student from one of his or her courses
-@app.route('/students/remove_from_course/', methods=['POST'])
-def remove_student_from_course():
-    student_id = request.form.get('student_id')
-    course_name = request.form.get('course_name')
-    if student_id is None or course_name is None:
-        return show_students()
-    leave_course(student_id, course_name)
-    return show_students()
-
-
-# Add a student to the course (from a list)
-@app.route('/students/add/to_course/', methods=['POST'])
-def add_student_to_course():
-    student_id = request.form.get('student_id')
-    course_name = request.form.get('course_name')
-    if student_id is None or course_name is None:
-        return show_students()
-    student_to_course(student_id, course_name)
-    return show_students()
-
-
-# Find all groups with less or equals student count.
-@app.route('/groups/find_le/', methods=['GET'])
-def show_groups_with_le_wolume():
-    volume = request.args.get('volume')
-    data = find_groups_le(int(volume))
-    return render_template('groups.html', data=data)
-
-
-# Find all students related to the course with a given name.
-@app.route('/students/on_course/', methods=['GET'])
-def show_course_students():
-    courses = get_courses()
-    course_name = request.args.get('course_name')
-    data = get_course_students(course_name)
-    return render_template('students.html', data=data, courses=courses)
+api.add_resource(Students, '/students/', methods=['GET', 'POST'], endpoint='students')
+api.add_resource(Students, '/students/<student_id>', methods=['DELETE'], endpoint='student')
+api.add_resource(Groups, '/groups/', methods=['GET', 'POST'])
+api.add_resource(StudentsOnCourse, '/course/', methods=['GET'])
+api.add_resource(
+    StudentsOnCourse,
+    '/students/<student_id>/course/',
+    methods=['PUT', 'DELETE'],
+    endpoint='student_on_course',
+    )
 
 
 if __name__ == '__main__':
