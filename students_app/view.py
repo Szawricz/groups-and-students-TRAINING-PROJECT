@@ -1,6 +1,8 @@
+from json import dumps
+
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
-from json import dumps
+from sqlalchemy import func
 
 from models import CourseModel, GroupModel, StudentModel, session
 
@@ -73,9 +75,14 @@ class Groups(Resource):
         args = parser.parse_args()
         volume = args['volume']
         groups = {}
-        for key, value in self.get().items():
-            if value['volume'] <= volume:
-                groups[key] = value
+        for group in session.query(GroupModel).\
+            outerjoin(StudentModel, GroupModel.name == StudentModel.group_id).\
+            group_by(GroupModel.id, GroupModel.name).\
+            having(func.count(GroupModel.name) <= volume).all():
+            groups[group.name] = dict(
+                id=group.id,
+                name=group.name,
+            )
         return dumps(groups, **JSON_DUMPS_PARAMS)
 
 
@@ -84,7 +91,7 @@ class StudentsOnCourse(Resource):
         args = parser.parse_args()
         course_name = args['course_name']
         students = {}
-        for key, value in Students.get().items():
+        for key, value in Students.get(self).items():
             if course_name in value['courses']:
                 students[key] = value
         return dumps(students, **JSON_DUMPS_PARAMS)
