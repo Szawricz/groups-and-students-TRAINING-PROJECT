@@ -3,7 +3,6 @@ from json import dumps
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
 from sqlalchemy import func
-
 from models import CourseModel, GroupModel, StudentModel, session
 
 JSON_DUMPS_PARAMS = dict(
@@ -36,6 +35,7 @@ class Students(Resource):
             )
         return dumps(students, **JSON_DUMPS_PARAMS)
 
+    # Add new student
     def post(self):
         args = parser.parse_args()
         first_name = args['first_name']
@@ -44,6 +44,7 @@ class Students(Resource):
         session.commit()
         return {'mesage': f'{first_name} {last_name} added.'}
 
+    # Delete student by STUDENT_ID
     def delete(self, student_id: int):
         session.delete(
             session.query(
@@ -71,14 +72,15 @@ class Groups(Resource):
             )
         return dumps(groups, **JSON_DUMPS_PARAMS)
 
+    # Find all groups with less or equals student count
     def post(self):
         args = parser.parse_args()
         volume = args['volume']
         groups = {}
         for group in session.query(GroupModel).\
             outerjoin(StudentModel, GroupModel.name == StudentModel.group_id).\
-            group_by(GroupModel.id, GroupModel.name).\
-            having(func.count(GroupModel.name) <= volume).all():
+                group_by(GroupModel.id, GroupModel.name).\
+                    having(func.count(GroupModel.name) <= volume).all():
             groups[group.name] = dict(
                 id=group.id,
                 name=group.name,
@@ -87,15 +89,24 @@ class Groups(Resource):
 
 
 class StudentsOnCourse(Resource):
+    # Find all students related to the course with a given name.
     def get(self):
         args = parser.parse_args()
         course_name = args['course_name']
         students = {}
-        for key, value in Students.get(self).items():
-            if course_name in value['courses']:
-                students[key] = value
+        for student in session.query(StudentModel).\
+            select_from(CourseModel).\
+                join(StudentModel.courses).\
+                    filter(CourseModel.name == course_name):
+            students[student.id] = dict(
+                id=student.id,
+                first_name=student.first_name,
+                last_name=student.last_name,
+                group_id=student.group_id,
+            )
         return dumps(students, **JSON_DUMPS_PARAMS)
 
+    # Add a student to the course (from a list)
     def put(self, student_id: int):
         args = parser.parse_args()
         course_name = args['course_name']
@@ -107,6 +118,7 @@ class StudentsOnCourse(Resource):
         session.commit()
         return {'mesage': f'Student with the ID = {student_id} added to the {course_name} course.'}
 
+    # Remove the student from one of his or her courses
     def delete(self, student_id: int):
         args = parser.parse_args()
         course_name = args['course_name']
