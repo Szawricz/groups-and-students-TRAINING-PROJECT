@@ -76,6 +76,3 @@ class CourseModel(Base):
 
     def __repr__(self) -> str:
         return self.name
-
-
-
