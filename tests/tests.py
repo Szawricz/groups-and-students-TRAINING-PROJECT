@@ -1,6 +1,7 @@
 """The unit tests for the students_app."""
 
 from unittest import TestCase
+
 from students_app.view import app
 
 

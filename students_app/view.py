@@ -3,6 +3,7 @@ from json import dumps
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
 from sqlalchemy import func
+
 from models import CourseModel, GroupModel, StudentModel, session
 
 JSON_DUMPS_PARAMS = dict(
