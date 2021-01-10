@@ -30,7 +30,7 @@ class TestReporterMethods(TestCase):
             data=dict(course_name='biology')
         ).get_data(as_text=True)
         response = self.client.put(
-            '/api/v1.0/students/201/courses/',
+            '/api/v1.0/students/201/course/',
             data=dict(course_name='biology'),
         ).get_data(as_text=True)
         self.assertIn(
