@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
 from sqlalchemy import func
+from sqlalchemy.orm.exc import NoResultFound
 
 from models import CourseModel, GroupModel, StudentModel, session
 
@@ -8,15 +9,15 @@ app = Flask(__name__)  # Init the flask application
 api = Api(app, prefix='/api/v1.0')
 
 
-name_parser = reqparse.RequestParser()
-name_parser.add_argument('first_name', type=str)
-name_parser.add_argument('last_name', type=str)
+name_parser = reqparse.RequestParser(bundle_errors=True)
+name_parser.add_argument('first_name', type=str, required=True)
+name_parser.add_argument('last_name', type=str, required=True)
 
 course_name_parser = reqparse.RequestParser()
-course_name_parser.add_argument('course_name', type=str)
+course_name_parser.add_argument('course_name', type=str, required=True)
 
 group_volume_parser = reqparse.RequestParser()
-group_volume_parser.add_argument('volume', type=int)
+group_volume_parser.add_argument('volume', type=int, required=True)
 
 
 class Students(Resource):
@@ -34,20 +35,26 @@ class Students(Resource):
 
     # Add new student
     def post(self):
-        args = name_parser.parse_args()
+        args = name_parser.parse_args(strict=True)
         first_name = args['first_name']
         last_name = args['last_name']
         session.add(StudentModel(None, first_name, last_name))
         session.commit()
-        return {'mesage': f'{first_name} {last_name} added.'}
+        return {'code': 201, 'message': f'{first_name} {last_name} added'}, 201
 
     # Delete student by STUDENT_ID
     def delete(self, student_id: int):
-        session.delete(
-            session.query(
-                StudentModel).filter(StudentModel.id == student_id).one())
-        session.commit()
-        return {'mesage': f'Student with the ID = {student_id} deleted.'}
+        try:
+            session.delete(
+                session.query(
+                    StudentModel).filter(StudentModel.id == student_id).one())
+            session.commit()
+            return {
+                'code': 200,
+                'message': f'Student with the ID = {student_id} deleted.',
+            }, 200
+        except NoResultFound:
+            return {'code': 404, 'message': 'Student not found'}, 404
 
 
 class Groups(Resource):
@@ -71,7 +78,7 @@ class Groups(Resource):
 
     # Find all groups with less or equals student count
     def post(self):
-        args = group_volume_parser.parse_args()
+        args = group_volume_parser.parse_args(strict=True)
         volume = args['volume']
         groups = {}
         for group in session.query(GroupModel).\
@@ -88,8 +95,11 @@ class Groups(Resource):
 class StudentsOnCourse(Resource):
     # Find all students related to the course with a given name.
     def get(self):
-        args = course_name_parser.parse_args()
+        args = course_name_parser.parse_args(strict=True)
         course_name = args['course_name']
+        courses_list = [crse.name for crse in session.query(CourseModel).all()]
+        if course_name not in courses_list:
+            return {'code': 404, 'message': 'Course not found'}, 404
         students = {}
         for student in session.query(StudentModel).\
             select_from(CourseModel).\
@@ -105,27 +115,46 @@ class StudentsOnCourse(Resource):
 
     # Add a student to the course (from a list)
     def put(self, student_id: int):
-        args = course_name_parser.parse_args()
+        args = course_name_parser.parse_args(strict=True)
         course_name = args['course_name']
+        courses_list = [crse.name for crse in session.query(CourseModel).all()]
+        if course_name not in courses_list:
+            return {'code': 404, 'message': 'Course not found'}, 404
         course = session.query(
             CourseModel).filter(CourseModel.name == course_name).one()
-        student = session.query(
-            StudentModel).filter(StudentModel.id == student_id).one()
-        student.courses.append(course)
-        session.commit()
-        return {'mesage': f'Student with the ID = {student_id} added to the {course_name} course.'}
+        try:
+            student = session.query(
+                StudentModel).filter(StudentModel.id == student_id).one()
+            student.courses.append(course)
+            session.commit()
+            return {
+                'code': 401,
+                'mesage': f'Student with the ID = {student_id} added to the {course_name} course.',
+                }, 401
+        except NoResultFound:
+            return {'code': 404, 'message': 'Student not found'}, 404
+
 
     # Remove the student from one of his or her courses
     def delete(self, student_id: int):
-        args = course_name_parser.parse_args()
+        args = course_name_parser.parse_args(strict=True)
         course_name = args['course_name']
+        courses_list = [crse.name for crse in session.query(CourseModel).all()]
+        if course_name not in courses_list:
+            return {'code': 404, 'message': 'Course not found'}, 404
         course = session.query(
             CourseModel).filter(CourseModel.name == course_name).one()
-        student = session.query(
-            StudentModel).filter(StudentModel.id == student_id).one()
-        student.courses.remove(course)
-        session.commit()
-        return {'mesage': f'Student with the ID = {student_id} removed from the {course_name} course.'}
+        try:
+            student = session.query(
+                StudentModel).filter(StudentModel.id == student_id).one()
+            student.courses.remove(course)
+            session.commit()
+            return {
+                'code': 404,
+                'mesage': f'Student with the ID = {student_id} removed from the {course_name} course.',
+                }, 404
+        except NoResultFound:
+            return {'code': 404, 'message': 'Student not found'}, 404
 
 
 api.add_resource(
