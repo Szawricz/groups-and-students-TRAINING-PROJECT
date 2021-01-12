@@ -1,16 +1,8 @@
-from json import dumps
-
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
 from sqlalchemy import func
 
 from models import CourseModel, GroupModel, StudentModel, session
-
-JSON_DUMPS_PARAMS = dict(
-            indent=4,
-            separators=[', ', ' = '],
-            ensure_ascii=False,
-)
 
 app = Flask(__name__)  # Init the flask application
 api = Api(app, prefix='/api/v1.0')
@@ -34,7 +26,7 @@ class Students(Resource):
                 group_id=student.group_id,
                 courses=[course.name for course in student.courses],
             )
-        return dumps(students, **JSON_DUMPS_PARAMS)
+        return students
 
     # Add new student
     def post(self):
@@ -71,7 +63,7 @@ class Groups(Resource):
                 volume=len(students),
                 students=students,
             )
-        return dumps(groups, **JSON_DUMPS_PARAMS)
+        return groups
 
     # Find all groups with less or equals student count
     def post(self):
@@ -86,7 +78,7 @@ class Groups(Resource):
                 id=group.id,
                 name=group.name,
             )
-        return dumps(groups, **JSON_DUMPS_PARAMS)
+        return groups
 
 
 class StudentsOnCourse(Resource):
@@ -105,7 +97,7 @@ class StudentsOnCourse(Resource):
                 last_name=student.last_name,
                 group_id=student.group_id,
             )
-        return dumps(students, **JSON_DUMPS_PARAMS)
+        return students
 
     # Add a student to the course (from a list)
     def put(self, student_id: int):
