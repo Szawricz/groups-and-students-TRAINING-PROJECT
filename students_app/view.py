@@ -8,11 +8,15 @@ app = Flask(__name__)  # Init the flask application
 api = Api(app, prefix='/api/v1.0')
 
 
-parser = reqparse.RequestParser()
-parser.add_argument('first_name', type=str)
-parser.add_argument('last_name', type=str)
-parser.add_argument('volume', type=int)
-parser.add_argument('course_name', type=str)
+name_parser = reqparse.RequestParser()
+name_parser.add_argument('first_name', type=str)
+name_parser.add_argument('last_name', type=str)
+
+course_name_parser = reqparse.RequestParser()
+course_name_parser.add_argument('course_name', type=str)
+
+group_volume_parser = reqparse.RequestParser()
+group_volume_parser.add_argument('volume', type=int)
 
 
 class Students(Resource):
@@ -30,7 +34,7 @@ class Students(Resource):
 
     # Add new student
     def post(self):
-        args = parser.parse_args()
+        args = name_parser.parse_args()
         first_name = args['first_name']
         last_name = args['last_name']
         session.add(StudentModel(None, first_name, last_name))
@@ -67,7 +71,7 @@ class Groups(Resource):
 
     # Find all groups with less or equals student count
     def post(self):
-        args = parser.parse_args()
+        args = group_volume_parser.parse_args()
         volume = args['volume']
         groups = {}
         for group in session.query(GroupModel).\
@@ -84,7 +88,7 @@ class Groups(Resource):
 class StudentsOnCourse(Resource):
     # Find all students related to the course with a given name.
     def get(self):
-        args = parser.parse_args()
+        args = course_name_parser.parse_args()
         course_name = args['course_name']
         students = {}
         for student in session.query(StudentModel).\
@@ -101,7 +105,7 @@ class StudentsOnCourse(Resource):
 
     # Add a student to the course (from a list)
     def put(self, student_id: int):
-        args = parser.parse_args()
+        args = course_name_parser.parse_args()
         course_name = args['course_name']
         course = session.query(
             CourseModel).filter(CourseModel.name == course_name).one()
@@ -113,7 +117,7 @@ class StudentsOnCourse(Resource):
 
     # Remove the student from one of his or her courses
     def delete(self, student_id: int):
-        args = parser.parse_args()
+        args = course_name_parser.parse_args()
         course_name = args['course_name']
         course = session.query(
             CourseModel).filter(CourseModel.name == course_name).one()
