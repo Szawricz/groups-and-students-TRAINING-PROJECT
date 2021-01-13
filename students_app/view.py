@@ -38,7 +38,13 @@ class Students(Resource):
         args = name_parser.parse_args(strict=True)
         first_name = args['first_name']
         last_name = args['last_name']
-        session.add(StudentModel(None, first_name, last_name))
+        session.add(
+            StudentModel(
+                group_id=None,
+                first_name=first_name,
+                last_name=last_name,
+            )
+        )
         session.commit()
         return {'code': 201, 'message': f'{first_name} {last_name} added'}, 201
 

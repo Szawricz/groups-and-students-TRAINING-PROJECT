@@ -36,9 +36,6 @@ class GroupModel(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
 
-    def __init__(self, name):
-        self.name = name
-
     def __repr__(self) -> str:
         return self.name
 
@@ -55,11 +52,6 @@ class StudentModel(Base):
         backref="students",
         )
 
-    def __init__(self, group_id, first_name, last_name):
-        self.group_id = group_id
-        self.first_name = first_name
-        self.last_name = last_name
-
     def __repr__(self) -> str:
         return f'\n{self.first_name} {self.last_name}: {self.group_id}'
 
@@ -69,10 +61,6 @@ class CourseModel(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     description = Column(String)
-
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
 
     def __repr__(self) -> str:
         return self.name

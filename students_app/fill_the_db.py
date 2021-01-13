@@ -24,7 +24,12 @@ def generate_courses() -> list:
         'russian language': 'an East Slavic language native to the Russians in Eastern Europe. It is an official language in Russia, Belarus, Kazakhstan, Kyrgyzstan, as well as being widely used throughout the Baltic states, the Caucasus and Central Asia.',
         'english language': 'a West Germanic language first spoken in early medieval England which eventually became the leading language of international discourse in today´s world',
     }
-    return [CourseModel(name, descr) for name, descr in courses.items()]
+    return [
+        CourseModel(
+            name=name,
+            description=descr,
+        ) for name, descr in courses.items()
+    ]
 
 
 def generate_students(students_number: int) -> list:
@@ -42,7 +47,13 @@ def generate_students(students_number: int) -> list:
     while len(students_names) < students_number:
         full_name = (choice(first_names), choice(second_names))
         students_names.add(full_name)
-    return [StudentModel(None, *name) for name in students_names]
+    return [
+        StudentModel(
+            group_id=None,
+            first_name=first_name,
+            last_name=last_name,
+            ) for first_name, last_name in students_names
+        ]
 
 
 def generate_groups(groups_number: int) -> list:
@@ -52,7 +63,7 @@ def generate_groups(groups_number: int) -> list:
         two_digits = ''.join(choices(digits, k=2))
         name = f'{two_characters}-{two_digits}'
         groups_names.add(name)
-    return [GroupModel(name) for name in groups_names]
+    return [GroupModel(name=name) for name in groups_names]
 
 
 def generate_groups_volumes(groups_number: int, students_number: int,
