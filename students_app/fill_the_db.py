@@ -94,11 +94,11 @@ if __name__ == "__main__":
         MAX_STUDENTS_IN_GROUP,
         )
     courses = generate_courses()
-    
+
     for student in students:
         choiced_courses = set(choices(courses, k=randint(1, 3)))
         student.courses.extend(choiced_courses)
-    
+
     session.add_all(students)
     session.add_all(groups)
     session.add_all(courses)

@@ -134,7 +134,6 @@ class StudentsOnCourse(Resource):
         except NoResultFound:
             return {'code': 404, 'message': 'Student not found'}, 404
 
-
     # Remove the student from one of his or her courses
     def delete(self, student_id: int):
         args = course_name_parser.parse_args(strict=True)
